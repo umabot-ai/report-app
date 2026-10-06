@@ -44,9 +44,10 @@ LATE_REASON_OPTIONS = [
 
 SUBMITTER_TITLE = "Submitted by"
 SUBMITTER_OPTIONS = [  # <-- put the real names of the people who submit here
-    "Person 1",
-    "Person 2",
-    "Person 3",
+    "Ruchira",
+    "Lasiru",
+    "Senal",
+    "Kavindu",
 ]
 
 TIMEZONE = ZoneInfo("Asia/Colombo")
