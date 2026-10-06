@@ -44,10 +44,9 @@ LATE_REASON_OPTIONS = [
 
 SUBMITTER_TITLE = "Submitted by"
 SUBMITTER_OPTIONS = [  # <-- put the real names of the people who submit here
-    "Ruchira",
-    "Lasiru",
-    "Senal",
-    "Kavindu",
+    "Person 1",
+    "Person 2",
+    "Person 3",
 ]
 
 TIMEZONE = ZoneInfo("Asia/Colombo")
@@ -81,7 +80,13 @@ def memory_reports() -> list:
 
 @st.cache_data(ttl=20)
 def read_sheet_rows():
-    return get_sheet().get_all_records()
+    values = get_sheet().get_all_values()
+    rows = []
+    for r in values[1:]:  # row 1 is the header row
+        r = (list(r) + [""] * len(HEADERS))[: len(HEADERS)]
+        if any(r):
+            rows.append(dict(zip(HEADERS, r)))
+    return rows
 
 
 def save_row(row: dict):
