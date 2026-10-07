@@ -205,7 +205,7 @@ else:
     st.code(bill(reports[-1]), language=None)
 
     df = pd.DataFrame(reports[::-1])
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df, width="stretch", hide_index=True)
     st.download_button(
         "Download all reports (CSV)",
         df.to_csv(index=False).encode("utf-8"),
