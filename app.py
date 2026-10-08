@@ -23,7 +23,7 @@ import streamlit as st
 # ---------- EDIT THESE ----------
 COLUMN1_TITLE = "Name"
 COLUMN1_OPTIONS = [
-    "Gayan Sir","Duminda Sir", "Nishantha Sir", "Janith Sir", "Devaka Sir", "Shehan Sir",
+    "Gayan Sir","Duminda Sir","Tharanga Sir", "Nishantha Sir", "Janith Sir", "Devaka Sir", "Shehan Sir",
     "Dilshan Sir", "Dinesh Sir", "Hemantha Sir", "Some Sir", "Pabasara Sir",
     "Rajitha Sir", "Lasindu Sir", "Shanaka Sir", "Namal Sir", "Madhawa Sir",
     "Suchira Sir", "Dinuka Sir", "Supun Sir", "Gimhan Sir", "Saman Sir",
