@@ -48,6 +48,7 @@ SUBMITTER_OPTIONS = [  # <-- put the real names of the people who submit here
     "Lasiru",
     "Senal",
     "Kavindu",
+    "Dineth",
 ]
 
 TIMEZONE = ZoneInfo("Asia/Colombo")
