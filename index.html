@@ -1,0 +1,170 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  :root { --text:#31333f; --primary:#ff4b4b; --sec:#f0f2f6; }
+  html, body { margin:0; padding:0; background:transparent; color:var(--text);
+               font-family:"Source Sans Pro", system-ui, Arial, sans-serif; }
+  .wrap { display:flex; flex-direction:column; align-items:center; gap:8px; padding:4px 0; }
+  .digital { display:flex; align-items:center; gap:6px; font-size:34px; font-weight:600;
+             font-variant-numeric:tabular-nums; }
+  .seg { border:none; border-radius:8px; padding:2px 12px; background:var(--sec); color:var(--text);
+         font:inherit; cursor:pointer; }
+  .seg.active { background:var(--primary); color:#fff; }
+  svg { touch-action:none; cursor:pointer; user-select:none; color:var(--text); }
+  .status { font-size:14px; opacity:.85; text-align:center; min-height:20px; }
+  .clear { border:1px solid var(--primary); color:var(--primary); background:transparent;
+           border-radius:8px; padding:6px 14px; font:inherit; font-size:14px; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="digital">
+    <span style="font-size:26px">🕒</span>
+    <button class="seg active" id="hh">--</button>:<button class="seg" id="mm">--</button>
+  </div>
+  <svg id="dial" width="260" height="260" viewBox="0 0 260 260"></svg>
+  <div class="status" id="status"></div>
+  <button class="clear" id="clear">Clear manual time</button>
+</div>
+
+<script>
+  const CX = 130, CY = 130;
+  let hour = null, minute = null, mode = "hour", dragging = false;
+
+  const svg = document.getElementById("dial");
+  const hhBtn = document.getElementById("hh");
+  const mmBtn = document.getElementById("mm");
+  const statusEl = document.getElementById("status");
+
+  // ---- Streamlit component protocol (no build tools needed) ----
+  function send(type, data) {
+    window.parent.postMessage(Object.assign({ isStreamlitMessage: true, type: type }, data), "*");
+  }
+  function emit() {
+    const v = hour === null ? null : pad(hour) + ":" + pad(minute);
+    send("streamlit:setComponentValue", { value: v, dataType: "json" });
+  }
+  window.addEventListener("message", function (e) {
+    if (e.data && e.data.type === "streamlit:render" && e.data.theme) {
+      const t = e.data.theme, r = document.documentElement.style;
+      if (t.textColor) r.setProperty("--text", t.textColor);
+      if (t.primaryColor) r.setProperty("--primary", t.primaryColor);
+      if (t.secondaryBackgroundColor) r.setProperty("--sec", t.secondaryBackgroundColor);
+    }
+  });
+  send("streamlit:componentReady", { apiVersion: 1 });
+  send("streamlit:setFrameHeight", { height: 410 });
+
+  // ---- helpers ----
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function polar(r, deg) {
+    const a = deg * Math.PI / 180;
+    return [CX + r * Math.sin(a), CY - r * Math.cos(a)];
+  }
+  // Hours: outer ring = 12,1..11   inner ring = 00,13..23
+  function hourPos(h) {
+    const inner = (h === 0 || h >= 13);
+    return { r: inner ? 62 : 98, deg: (h % 12) * 30, inner: inner };
+  }
+
+  function draw() {
+    let s = '<circle cx="130" cy="130" r="126" fill="var(--sec)"/>';
+
+    if (mode === "hour") {
+      for (let h = 0; h < 24; h++) {
+        const p = hourPos(h), xy = polar(p.r, p.deg);
+        const label = p.inner ? pad(h) : h;
+        s += '<text x="' + xy[0] + '" y="' + xy[1] + '" text-anchor="middle" dominant-baseline="central" ' +
+             'font-size="' + (p.inner ? 12 : 15) + '" fill="currentColor" opacity="' + (p.inner ? 0.75 : 1) + '">' +
+             label + '</text>';
+      }
+    } else {
+      for (let m = 0; m < 60; m++) {
+        const a = polar(116, m * 6), b = polar(m % 5 === 0 ? 108 : 112, m * 6);
+        s += '<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] +
+             '" stroke="currentColor" opacity="0.4"/>';
+        if (m % 5 === 0) {
+          const xy = polar(94, m * 6);
+          s += '<text x="' + xy[0] + '" y="' + xy[1] + '" text-anchor="middle" dominant-baseline="central" ' +
+               'font-size="15" fill="currentColor">' + pad(m) + '</text>';
+        }
+      }
+    }
+
+    if (hour !== null) {
+      const hp = hourPos(hour);
+      const hourLen = mode === "hour" ? hp.r : (hp.inner ? 40 : 66);
+      const minDeg = minute * 6;
+      const minLen = mode === "minute" ? 94 : 84;
+      const hEnd = polar(hourLen, hp.deg);
+      const mEnd = polar(minLen, minDeg);
+
+      // minute hand (long, thin) and hour hand (short, thick)
+      s += '<line x1="130" y1="130" x2="' + mEnd[0] + '" y2="' + mEnd[1] +
+           '" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" opacity="' + (mode === "minute" ? 1 : 0.55) + '"/>';
+      s += '<line x1="130" y1="130" x2="' + hEnd[0] + '" y2="' + hEnd[1] +
+           '" stroke="currentColor" stroke-width="6" stroke-linecap="round" opacity="' + (mode === "hour" ? 0.9 : 0.6) + '"/>';
+
+      // selection bubble on the active hand
+      const tip = mode === "hour" ? hEnd : mEnd;
+      const txt = mode === "hour" ? pad(hour) : pad(minute);
+      s += '<circle cx="' + tip[0] + '" cy="' + tip[1] + '" r="17" fill="var(--primary)"/>';
+      s += '<text x="' + tip[0] + '" y="' + tip[1] + '" text-anchor="middle" dominant-baseline="central" ' +
+           'font-size="14" font-weight="700" fill="#fff">' + txt + '</text>';
+    }
+    s += '<circle cx="130" cy="130" r="5" fill="currentColor"/>';
+    svg.innerHTML = s;
+
+    hhBtn.textContent = hour === null ? "--" : pad(hour);
+    mmBtn.textContent = hour === null ? "--" : pad(minute);
+    hhBtn.classList.toggle("active", mode === "hour");
+    mmBtn.classList.toggle("active", mode === "minute");
+    statusEl.textContent = hour === null
+      ? "Optional - leave empty to use the automatic time."
+      : "Manual time: " + pad(hour) + ":" + pad(minute) + " (24-hour)";
+  }
+
+  function pick(evt) {
+    const rect = svg.getBoundingClientRect();
+    const k = 260 / rect.width;
+    const x = (evt.clientX - rect.left) * k - CX;
+    const y = (evt.clientY - rect.top) * k - CY;
+    let deg = Math.atan2(x, -y) * 180 / Math.PI;
+    if (deg < 0) deg += 360;
+    if (mode === "hour") {
+      const idx = Math.round(deg / 30) % 12;
+      const inner = Math.hypot(x, y) < 80;
+      hour = inner ? (idx === 0 ? 0 : idx + 12) : (idx === 0 ? 12 : idx);
+      if (minute === null) minute = 0;
+    } else {
+      minute = Math.round(deg / 6) % 60;
+    }
+    draw();
+  }
+
+  svg.addEventListener("pointerdown", function (e) {
+    dragging = true;
+    svg.setPointerCapture(e.pointerId);
+    pick(e);
+  });
+  svg.addEventListener("pointermove", function (e) { if (dragging) pick(e); });
+  svg.addEventListener("pointerup", function () {
+    if (!dragging) return;
+    dragging = false;
+    if (mode === "hour") mode = "minute";   // after the hour, go straight to minutes
+    draw();
+    emit();
+  });
+
+  hhBtn.addEventListener("click", function () { mode = "hour"; draw(); });
+  mmBtn.addEventListener("click", function () { if (hour !== null) { mode = "minute"; draw(); } });
+  document.getElementById("clear").addEventListener("click", function () {
+    hour = null; minute = null; mode = "hour"; draw(); emit();
+  });
+
+  draw();
+</script>
+</body>
+</html>
