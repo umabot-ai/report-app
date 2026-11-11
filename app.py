@@ -13,12 +13,20 @@ reports only in temporary memory (a warning is shown on the page).
 Run locally:   streamlit run app.py
 """
 
+import os
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 import gspread
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
+
+# Analog 24-hour clock (lives in the "clock_picker" folder next to this file)
+clock_picker = components.declare_component(
+    "clock_picker",
+    path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "clock_picker"),
+)
 
 # ---------- EDIT THESE ----------
 COLUMN1_TITLE = "Name"
@@ -51,10 +59,12 @@ SUBMITTER_OPTIONS = [  # <-- put the real names of the people who submit here
     "Dineth",
 ]
 
+MANUAL_TITLE = "Manual Time"
+
 TIMEZONE = ZoneInfo("Asia/Colombo")
 # --------------------------------
 
-HEADERS = ["Date", COLUMN1_TITLE, LATE_REASON_TITLE, SUBMITTER_TITLE]
+HEADERS = ["Date", COLUMN1_TITLE, LATE_REASON_TITLE, SUBMITTER_TITLE, MANUAL_TITLE]
 
 st.set_page_config(page_title="Report Entry", page_icon="🧾")
 
@@ -69,8 +79,15 @@ def get_sheet():
     except Exception:
         return None
     ws = gspread.service_account_from_dict(creds).open_by_key(sheet_id).sheet1
-    if not ws.get_all_values():
+    values = ws.get_all_values()
+    if not values:
         ws.append_row(HEADERS, value_input_option="RAW")
+    else:
+        # Older sheets may be missing the newest header(s): fill them in.
+        existing = values[0]
+        for i, h in enumerate(HEADERS, start=1):
+            if i > len(existing) or not existing[i - 1].strip():
+                ws.update_cell(1, i, h)
     return ws
 
 
@@ -123,6 +140,8 @@ def send_report():
         COLUMN1_TITLE: name,
         LATE_REASON_TITLE: st.session_state.get("reason") or "",
         SUBMITTER_TITLE: st.session_state.get("submitter") or "",
+        # "HH:MM" if a manual time was picked on the clock, otherwise blank
+        MANUAL_TITLE: st.session_state.get(f"manual_time_{st.session_state.clock_n}") or "",
     }
 
     try:
@@ -135,6 +154,7 @@ def send_report():
     st.session_state.name = None
     st.session_state.reason = None
     st.session_state.submitter = None
+    st.session_state.clock_n += 1  # new key = fresh, empty clock
     st.session_state.flash = ("success", "Report sent ✅")
 
 
@@ -148,6 +168,7 @@ def bill(r: dict) -> str:
         f"{COLUMN1_TITLE:<13}: {r[COLUMN1_TITLE]}\n"
         f"{LATE_REASON_TITLE:<13}: {r[LATE_REASON_TITLE] or '-'}\n"
         f"{SUBMITTER_TITLE:<13}: {r[SUBMITTER_TITLE] or '-'}\n"
+        f"{MANUAL_TITLE:<13}: {r.get(MANUAL_TITLE) or '-'}\n"
         f"{line}"
     )
 
@@ -183,6 +204,17 @@ st.selectbox(
     placeholder=f"Select {SUBMITTER_TITLE}",
     key="submitter",
 )
+
+# Optional: pick the report time manually (emergency use only)
+if "clock_n" not in st.session_state:
+    st.session_state.clock_n = 0
+
+with st.expander("⏰ Set time manually (optional, emergency only)"):
+    st.caption(
+        "Tap the hour, then the minute (24-hour). Leave it empty to use the "
+        "automatic time. The manual time is saved in its own column."
+    )
+    clock_picker(key=f"manual_time_{st.session_state.clock_n}", default=None)
 
 st.button("Send Report", type="primary", on_click=send_report)
 
