@@ -34,12 +34,12 @@ COLUMN1_OPTIONS = [
     "Gayan Sir","Duminda Sir","Tharanga Sir", "Nishantha Sir", "Janith Sir", "Devaka Sir", "Shehan Sir",
     "Dilshan Sir", "Dinesh Sir", "Hemantha Sir", "Some Sir","Udesh Sir", "Pabasara Sir", "Theekshana Sir",
     "Rajitha Sir", "Lasindu Sir", "Shanaka Sir", "Namal Sir", "Madhawa Sir","Sahan Sir",
-    "Suchira Sir", "Dinuka Sir", "Supun Sir", "Gimhan Sir", "Udesh Sir", "Saman Sir",
+    "Suchira Sir", "Dinuka Sir", "Supun Sir", "Gimhan Sir", "Udesh Sir", "Saman Sir","Sameera Sir",
     "Indika Sir", "Buddika Sir", "Miyuru Sir", "Chamika Sir", "Krishan Sir", "Chirath Sir",
     "Charith Sir", "Ruwan Sir", "Danushka Sir", "Himanka Sir", "Ashoka Sir","Sandalu Sir",
-    "Bandara Sir", "Sanjaya Sir", "Aruni Miss", "Bodhini Miss", "Iresha Miss",
+    "Bandara Sir", "Sanjaya Sir", "Aruni Miss", "Bodhini Miss", "Iresha Miss","Media Academy",
     "Harshani Miss", "Inoka Miss", "Thathya Miss","Kavindya Miss", "Dileni Miss",
-    "Pabasaraa Miss", "Ayesha Miss","Chamodya Miss","Midu Miss","Dilini Miss",
+    "Pabasaraa Miss", "Ayesha Miss","Chamodya Miss","Midu Miss","Dilini Miss","IMA CAMPUS",
 ]
 
 LATE_REASON_TITLE = "Late Reason"
@@ -48,6 +48,7 @@ LATE_REASON_OPTIONS = [
     "Lecturer Late",
     "Technical Error",
     "Clz Queue",
+    "Coordination Error",
 ]
 
 SUBMITTER_TITLE = "Submitted by"
