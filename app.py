@@ -32,14 +32,14 @@ clock_picker = components.declare_component(
 COLUMN1_TITLE = "Name"
 COLUMN1_OPTIONS = [
     "Gayan Sir","Duminda Sir","Tharanga Sir", "Nishantha Sir", "Janith Sir", "Devaka Sir", "Shehan Sir",
-    "Dilshan Sir", "Dinesh Sir", "Hemantha Sir", "Some Sir", "Pabasara Sir", "Theekshana Sir",
-    "Rajitha Sir", "Lasindu Sir", "Shanaka Sir", "Namal Sir", "Madhawa Sir",
+    "Dilshan Sir", "Dinesh Sir", "Hemantha Sir", "Some Sir","Udesh Sir", "Pabasara Sir", "Theekshana Sir",
+    "Rajitha Sir", "Lasindu Sir", "Shanaka Sir", "Namal Sir", "Madhawa Sir","Sahan Sir",
     "Suchira Sir", "Dinuka Sir", "Supun Sir", "Gimhan Sir", "Udesh Sir", "Saman Sir",
     "Indika Sir", "Buddika Sir", "Miyuru Sir", "Chamika Sir", "Krishan Sir", "Chirath Sir",
-    "Charith Sir", "Ruwan Sir", "Danushka Sir", "Himanka Sir", "Ashoka Sir",
+    "Charith Sir", "Ruwan Sir", "Danushka Sir", "Himanka Sir", "Ashoka Sir","Sandalu Sir",
     "Bandara Sir", "Sanjaya Sir", "Aruni Miss", "Bodhini Miss", "Iresha Miss",
-    "Harshani Miss", "Inoka Miss", "Thathya Miss", "Dileni Miss",
-    "Pabasaraa Miss", "Ayesha Miss",
+    "Harshani Miss", "Inoka Miss", "Thathya Miss","Kavindya Miss", "Dileni Miss",
+    "Pabasaraa Miss", "Ayesha Miss","Chamodya Miss","Midu Miss","Dilini Miss",
 ]
 
 LATE_REASON_TITLE = "Late Reason"
